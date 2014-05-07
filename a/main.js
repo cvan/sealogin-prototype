@@ -1,5 +1,14 @@
 (function () {
 
+// TODO: Abstract away settings in a better way.
+var settings = {
+  service: {
+    name: 'Twitter',
+    logo: 'https://g.twimg.com/Twitter_logo_white.png',
+    redirectUrl: 'https://twitter.com'
+  }
+};
+
 if (!window.location.origin) {
   // For IE lol
   window.location.origin = window.location.protocol + '//' + window.location.host;
@@ -16,6 +25,16 @@ if (!window.performance) {
 }
 
 window.start_time = window.performance.now();
+
+
+function escape_(string) {
+  return ('' + string).replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#x27;')
+                      .replace(/\//g,'&#x2F;');
+}
 
 /* Python-ish string formatting:
  * >>> format('{0}', ['zzz'])
@@ -83,6 +102,7 @@ function checkCodeValidity(code, successCB, errorCB) {
 var $body = $(document.body);
 var $loginForm = $('.login-form');
 var $confirmForm = $('.confirm-form');
+var $doneForm = $('.done-form');
 
 function checkFormValidity($form) {
   // Toggle submit button to be disabled/enabled
@@ -97,6 +117,7 @@ function checkFormValidity($form) {
   }
 }
 
+
 $body.on('input', 'input[name=phone]', function () {
   if (this.checkValidity()) {
     // If the user typed anything valid, let's start showing success/error
@@ -110,11 +131,13 @@ $body.on('input', 'input[name=phone]', function () {
   this.classList.toggle('hasValue', this.value);
 }).on('submit', '.login-form', function (e) {
   e.preventDefault();
-  localStorage.signedUp = '1';
+  localStorage.signingUp = '1';
   localStorage.phone = $(this).find('input[name=phone]').val();
   showConfirm();
 }).on('submit', '.confirm-form', function () {
   // TODO: Check validity against server.
+  localStorage.signedUp = '1';
+  showDone();
 }).on('click', '.confirm-form .back', function () {
   showSignup();
 }).on('input', 'input[name=code]', function () {
@@ -141,24 +164,11 @@ $body.on('input', 'input[name=phone]', function () {
   }
 
   input.classList.toggle('hasValue', this.value);
+}).on('submit', '.done-form', function (e) {
+  e.preventDefault();
+  window.location = settings.service.redirectUrl;
 });
 
-function showConfirm(init) {
-  hideSignup();
-  if (!$confirmForm.length) {
-    $body.prepend($('#template-confirm-form').html());
-    $confirmForm = $('.confirm-form');
-  }
-  $confirmForm.addClass('show');
-  var $phone = $confirmForm.find('legend .tel');
-  $phone.text(format($phone.text(), {phone: formatPhone(localStorage.phone)}));
-}
-
-function hideConfirm(init) {
-  delete localStorage.signedUp;
-  delete localStorage.phone;
-  $confirmForm.removeClass('show');
-}
 
 function showSignup(init) {
   hideConfirm();
@@ -169,8 +179,50 @@ function hideSignup(init) {
   $loginForm.removeClass('show');
 }
 
-if (localStorage.signedUp) {
+function showConfirm(init) {
+  hideSignup();
+
+  if (!$confirmForm.length) {
+    $body.prepend(template($('#template-confirm-form').html())({
+      phone: escape_(formatPhone(localStorage.phone))
+    }));
+    $confirmForm = $('.confirm-form');
+  }
+
+  $confirmForm.addClass('show');
+}
+
+function hideConfirm(init) {
+  delete localStorage.signingUp;
+  $confirmForm.removeClass('show');
+}
+
+function showDone(init) {
+  hideSignup();
+  hideConfirm();
+
+  if (!$doneForm.length) {
+    $body.prepend(template($('#template-done-form').html())({
+      phone: escape_(formatPhone(localStorage.phone)),
+      serviceName: escape_(settings.service.name),
+      serviceLogo: escape_(settings.service.logo)
+    }));
+    $doneForm = $('.done-form');
+
+    // TODO: Ensure that API has assertion so service can verify against it.
+  }
+
+  $doneForm.addClass('show');
+}
+
+function hideDone(init) {
+  $doneForm.removeClass('show');
+}
+
+if (localStorage.signingUp) {
   showConfirm(true);
+} else if (localStorage.signedUp) {
+  showDone(true);
 } else {
   showSignup(true);
 }
