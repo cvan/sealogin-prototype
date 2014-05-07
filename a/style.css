@@ -13,7 +13,7 @@ body {
 }
 
 body {
-  color:; #fff;
+  color: #fff;
   font-family: "Source Sans Pro", Helvetica, "Helvetica Neue", sans-serif;
   min-width: 280px;
   padding: 5% 2.5%;
@@ -51,10 +51,15 @@ button, input, select {
 
 button, input {
   color: #fff;
+  margin-top: 30px;
 }
 
-button[disabled] {
+button[disabled],
+button[disabled]:hover,
+button[disabled]:active {
   background: #313;
+  color: #fff;
+  cursor: not-allowed;
   opacity: .8;
 }
 
@@ -82,6 +87,7 @@ input {
   background: none;
   border: 2px solid #fff;
   display: block;
+  font-size: 20px;
   margin: 5px 0 15px;
   padding: 15px;
   position: relative;
@@ -97,12 +103,16 @@ input::-webkit-input-placeholder {
 
 input:-moz-placeholder {
   color: #ccc;
+  opacity: 1;
   text-overflow: ellipsis;  /* Firefox 18 and below */
+  transition: opacity .3s ease-in-out;
 }
 
 input::-moz-placeholder {
   color: #ccc;
+  opacity: 1;
   text-overflow: ellipsis;  /* Firefox 19+ */
+  transition: opacity .3s ease-in-out;
 }
 
 input[placeholder] {
@@ -114,14 +124,18 @@ Because bug 673873 is stupidface.
 Yes, the order matters. Firefox 18 (and below) is clownshoes.
 */
 input[placeholder]:-moz-placeholder:focus {
-  color: transparent !important;
+  opacity: 0;
 }
 input[placeholder]:focus::-moz-placeholder {
-  color: transparent !important;
+  opacity: 0;
 }
 input[placeholder]:focus::-webkit-input-placeholder {
-  /*color: transparent !important;*/
   opacity: 0;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
 }
 
 label {
@@ -131,13 +145,12 @@ label {
   width: 100%;
 }
 
-.login-form input {
-  font-size: 20px;
+form {
+  display: none;
 }
 
-.login-form input,
-button {
-  margin-top: 30px;
+form.show {
+  display: block;
 }
 
 .label {
@@ -248,9 +261,12 @@ legend {
   font-size: 24px;
   font-weight: 600;
   letter-spacing: 2px;
-  padding: 15px 0;
+  overflow: hidden;
+  padding: 15px 0 30px;
   text-align: center;
+  text-overflow: ellipsis;
   text-transform: uppercase;
+  white-space: nowrap;
   width: 100%;
 }
 
@@ -263,5 +279,23 @@ legend {
 }
 
 .help:hover {
+  color: #fff;
+}
+
+.back {
+  color: rgba(255,255,255,.25);
+  display: inline-block;
+  font-size: 24px;
+  left: 0;
+  line-height: 18px;
+  height: 100px;
+  padding: 5% 2.5%;
+  position: absolute;
+  top: 0;
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+
+.back:hover {
   color: #fff;
 }

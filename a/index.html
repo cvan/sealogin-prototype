@@ -19,6 +19,20 @@
       <button disabled type="submit">Sign up / Sign in</button>
       <a class="help" href="#help"><span>Need help?</span></a>
     </form>
+    <script id="template-confirm-form" type="text/template">
+      <form class="confirm-form" method="post">
+        <a class="back">&#10140;</a>
+        <legend>SMS sent to <b class="tel">{phone}</b></legend>
+        <label>
+          <input type="number" name="code" required min="10000" max="99999" maxlength="5" placeholder="Confirmation code">
+          <div class="validity valid">Valid</div>
+          <div class="validity invalid">Invalid</div>
+          <div class="label">Confirmation code</div>
+        </label>
+        <button disabled type="submit">Sign in</button>
+        <a class="help" href="#help"><span>Need help?</span></a>
+      </form>
+    </script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.3/zepto.min.js"></script>
     <script src="main.js"></script>
   </body>

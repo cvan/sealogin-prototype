@@ -17,28 +17,122 @@ if (!window.performance) {
 
 window.start_time = window.performance.now();
 
+/* Python-ish string formatting:
+ * >>> format('{0}', ['zzz'])
+ * "zzz"
+ * >>> format('{0}{1}', 1, 2)
+ * "12"
+ * >>> format('{x}', {x: 1})
+ * "1"
+ */
+
+var RE_FORMAT = /\{([^}]+)\}/g;
+
+function format(s, args) {
+  if (!s) {
+    throw 'Format string is empty!';
+  }
+  if (!args) {
+    return;
+  }
+  if (!(args instanceof Array || args instanceof Object)) {
+    args = Array.prototype.slice.call(arguments, 1);
+  }
+  return s.replace(RE_FORMAT, function (_, match) {
+    return args[match];
+  });
+}
+
+function template(s) {
+  if (!s) {
+    throw 'Template string is empty!';
+  }
+  return function (args) {
+    return format(s, args);
+  };
+}
+
+
+function formatPhone(digits) {
+  // Returns a formatted phone number, like so: 248 555 1212.
+  digits = (digits || '').replace(/\D/g, '');
+  if (digits.length === 11 && digits[0] === '1') {
+    digits = digits.substr(1);
+  }
+  if (digits.length === 10) {
+    return digits.substr(0, 3) + ' ' +
+           digits.substr(3, 3) + ' ' +
+           digits.substr(6, 9);
+  }
+  return digits;
+}
+
+
 var $body = $(document.body);
+var $loginForm = $('.login-form');
+var $confirmForm = $('.confirm-form');
 
 $body.on('input', 'input', function () {
   var $form = $(this).closest('form');
-
   if (this.checkValidity()) {
     // If the user typed anything valid, let's start showing success/error
     // colours/messages from now on.
     this.classList.add('dirty');
     if ($form[0].checkValidity()) {
       console.log('Form is now valid, enabling submit button');
-      this.blur();
+      //this.blur();
       $form.find('button[type=submit]').removeAttr('disabled').trigger('focus');
     }
-  } else if (!$form[0].checkValidity() && !$form.find('button[type=submit]')[0].hasAttribute('disabled')) {
+  } else if (!$form[0].checkValidity() &&
+             !$form.find('button[type=submit]')[0].hasAttribute('disabled')) {
     console.log('Form is invalid, disabling submit button');
     $form.find('button[type=submit]').attr('disabled', '');
   }
   this.classList.toggle('hasValue', !!this.value);
 }).on('blur', 'input', function () {
   this.classList.add('dirty');
-  this.classList.toggle('hasValue', !!this.value);
+  this.classList.toggle('hasValue', this.value);
+}).on('submit', '.login-form', function (e) {
+  e.preventDefault();
+  localStorage.signedUp = '1';
+  localStorage.phone = $(this).find('input[name=phone]').val();
+  showConfirm();
+}).on('submit', '.confirm-form', function () {
+  // TODO: Check validity against server.
+}).on('click', '.confirm-form .back', function () {
+  showSignup();
 });
+
+function showConfirm(init) {
+  hideSignup();
+  if (!$confirmForm.length) {
+    $body.prepend($('#template-confirm-form').html());
+    $confirmForm = $('.confirm-form');
+  }
+  $confirmForm.addClass('show');
+  var $phone = $confirmForm.find('legend .tel');
+  $phone.text(format($phone.text(), {phone: formatPhone(localStorage.phone)}));
+}
+
+function hideConfirm(init) {
+  delete localStorage.signedUp;
+  delete localStorage.phone;
+  $confirmForm.removeClass('show');
+}
+
+function showSignup(init) {
+  hideConfirm();
+  $loginForm.addClass('show');
+}
+
+function hideSignup(init) {
+  $loginForm.removeClass('show');
+}
+
+if (localStorage.signedUp) {
+  showConfirm(true);
+} else {
+  showSignup(true);
+}
 
 })();
