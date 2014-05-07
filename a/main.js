@@ -68,27 +68,43 @@ function formatPhone(digits) {
 }
 
 
+function checkCodeValidity(code, successCB, errorCB) {
+  // TODO: Contact API to confirm that the confirmation code is correct.
+  setTimeout(function () {
+    if (code === '12345') {
+      successCB(code);
+    } else {
+      errorCB(code);
+    }
+  }, 500);
+}
+
+
 var $body = $(document.body);
 var $loginForm = $('.login-form');
 var $confirmForm = $('.confirm-form');
 
-$body.on('input', 'input', function () {
-  var $form = $(this).closest('form');
+function checkFormValidity($form) {
+  // Toggle submit button to be disabled/enabled
+  // and focus on submit button if valid.
+  if ($form[0].checkValidity()) {
+    console.log('Form is now valid, enabling submit button');
+    //this.blur();
+    $form.find('button[type=submit]').removeAttr('disabled').trigger('focus');
+  } else if (!$form.find('button[type=submit]')[0].hasAttribute('disabled')) {
+    console.log('Form is invalid, disabling submit button');
+    $form.find('button[type=submit]').attr('disabled', '');
+  }
+}
+
+$body.on('input', 'input[name=phone]', function () {
   if (this.checkValidity()) {
     // If the user typed anything valid, let's start showing success/error
     // colours/messages from now on.
     this.classList.add('dirty');
-    if ($form[0].checkValidity()) {
-      console.log('Form is now valid, enabling submit button');
-      //this.blur();
-      $form.find('button[type=submit]').removeAttr('disabled').trigger('focus');
-    }
-  } else if (!$form[0].checkValidity() &&
-             !$form.find('button[type=submit]')[0].hasAttribute('disabled')) {
-    console.log('Form is invalid, disabling submit button');
-    $form.find('button[type=submit]').attr('disabled', '');
   }
   this.classList.toggle('hasValue', !!this.value);
+  checkFormValidity($(this).closest('form'));
 }).on('blur', 'input', function () {
   this.classList.add('dirty');
   this.classList.toggle('hasValue', this.value);
@@ -101,6 +117,30 @@ $body.on('input', 'input', function () {
   // TODO: Check validity against server.
 }).on('click', '.confirm-form .back', function () {
   showSignup();
+}).on('input', 'input[name=code]', function () {
+  var input = this;
+  var $form = $(input).closest('form');
+
+  function done() {
+    input.classList.add('dirty');
+    checkFormValidity($form);
+  }
+
+  if (input.value.length === 5) {
+    checkCodeValidity(input.value, function () {
+      console.log('Confirmation code was correct');
+      input.setCustomValidity('');
+      done();
+    }, function () {
+      console.log('Confirmation code was incorrect');
+      input.setCustomValidity('Confirmation code was invalid');
+      done();
+    });
+  } else if (input.value.length > 5) {
+    done();
+  }
+
+  input.classList.toggle('hasValue', this.value);
 });
 
 function showConfirm(init) {
