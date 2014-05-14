@@ -36,6 +36,7 @@ function escape_(string) {
                       .replace(/\//g,'&#x2F;');
 }
 
+
 /* Python-ish string formatting:
  * >>> format('{0}', ['zzz'])
  * "zzz"
@@ -99,11 +100,6 @@ function checkCodeValidity(code, successCB, errorCB) {
 }
 
 
-var $body = $(document.body);
-var $loginForm = $('.login-form');
-var $confirmForm = $('.confirm-form');
-var $doneForm = $('.done-form');
-
 function checkFormValidity($form) {
   // Toggle submit button to be disabled/enabled
   // and focus on submit button if valid.
@@ -118,7 +114,26 @@ function checkFormValidity($form) {
 }
 
 
-$body.on('input', 'input[name=phone]', function () {
+var RE_TAG_BLACKLIST = (
+  /input|keygen|meter|option|output|progress|select|textarea/i);
+function fieldFocused(e) {
+  return RE_TAG_BLACKLIST.test(e.target.nodeName);
+}
+
+var $body = $(document.body);
+var $loginForm = $('.login-form');
+var $confirmForm = $('.confirm-form');
+var $doneForm = $('.done-form');
+
+$body.on('keyup', function (e) {
+  // Pressing 'r' should clear `localStorage` and reset everything.
+  if (e.keyCode === 82 && !fieldFocused(e)) {
+    console.log('Resetting flow');
+    localStorage.clear();
+    showSignup();
+    $('input').val('').removeClass('dirty hasValue');
+  }
+}).on('input', 'input[name=phone]', function () {
   if (this.checkValidity()) {
     // If the user typed anything valid, let's start showing success/error
     // colours/messages from now on.
@@ -170,16 +185,17 @@ $body.on('input', 'input[name=phone]', function () {
 });
 
 
-function showSignup(init) {
+function showSignup() {
   hideConfirm();
+  hideDone();
   $loginForm.addClass('show');
 }
 
-function hideSignup(init) {
+function hideSignup() {
   $loginForm.removeClass('show');
 }
 
-function showConfirm(init) {
+function showConfirm() {
   hideSignup();
 
   if (!$confirmForm.length) {
@@ -192,12 +208,12 @@ function showConfirm(init) {
   $confirmForm.addClass('show');
 }
 
-function hideConfirm(init) {
+function hideConfirm() {
   delete localStorage.signingUp;
   $confirmForm.removeClass('show');
 }
 
-function showDone(init) {
+function showDone() {
   hideSignup();
   hideConfirm();
 
@@ -215,16 +231,16 @@ function showDone(init) {
   $doneForm.addClass('show');
 }
 
-function hideDone(init) {
+function hideDone() {
   $doneForm.removeClass('show');
 }
 
 if (localStorage.signingUp) {
-  showConfirm(true);
+  showConfirm();
 } else if (localStorage.signedUp) {
-  showDone(true);
+  showDone();
 } else {
-  showSignup(true);
+  showSignup();
 }
 
 })();
