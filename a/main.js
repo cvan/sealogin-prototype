@@ -129,8 +129,9 @@ $body.on('input', 'input[name=phone]', function () {
 }).on('blur', 'input', function () {
   this.classList.add('dirty');
   this.classList.toggle('hasValue', this.value);
-}).on('submit', '.login-form', function (e) {
+}).on('submit', 'form', function (e) {
   e.preventDefault();
+}).on('submit', '.login-form', function () {
   localStorage.signingUp = '1';
   localStorage.phone = $(this).find('input[name=phone]').val();
   showConfirm();
@@ -164,8 +165,7 @@ $body.on('input', 'input[name=phone]', function () {
   }
 
   input.classList.toggle('hasValue', this.value);
-}).on('submit', '.done-form', function (e) {
-  e.preventDefault();
+}).on('submit', '.done-form', function () {
   window.location = settings.service.redirectUrl;
 });
 
