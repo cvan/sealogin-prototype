@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <head>
+    <title>sealogin</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+    <link href="style.css" media="all" rel="stylesheet" type="text/css">
+    <!--<link rel="prefetch" type="application/l10n" href="l10n/locales.ini">-->
+    <meta charset="utf-8">
+  </head>
+  <body data-authenticated="false">
+    <form class="login-form" method="post">
+      <legend>Welcome</legend>
+      <label>
+        <input type="tel" name="phone" required pattern="(.*\d.*){10,15}" autocomplete="tel" placeholder="Phone number">
+        <div class="validity valid">Valid</div>
+        <div class="validity invalid">Invalid</div>
+        <div class="label">Phone number</div>
+      </label>
+      <button disabled type="submit">Sign up / Sign in</button>
+      <a class="help" href="#help"><span>Need help?</span></a>
+    </form>
+    <script id="template-confirm-form" type="text/template">
+      <form class="confirm-form" method="post">
+        <a class="back">&#10140;</a>
+        <legend>SMS sent to <b class="tel">{phone}</b></legend>
+        <label>
+          <input type="number" name="code" required min="10000" max="99999" maxlength="5" placeholder="Confirmation code">
+          <div class="validity valid">Valid</div>
+          <div class="validity invalid">Invalid</div>
+          <div class="label">Confirmation code</div>
+        </label>
+        <button disabled type="submit">Sign in</button>
+        <a class="help" href="#help"><span>Need help?</span></a>
+      </form>
+    </script>
+    <script id="template-done-form" type="text/template">
+      <form class="done-form" method="post">
+        <legend>Account created for <b class="tel">{phone}</b></legend>
+        <p class="service">
+          <img class="service-logo" src="{serviceLogo}" alt="{serviceName}">
+          <span class="service-name">{serviceName}</span>
+        </p>
+        <button type="submit">Continue</button>
+        <a class="help" href="#help"><span>Need help?</span></a>
+      </form>
+    </script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.3/zepto.min.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
